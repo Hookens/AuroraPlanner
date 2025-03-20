@@ -6,6 +6,7 @@ from discord.bot import Bot
 from discord.enums import ActivityType
 from discord.ext import commands
 
+from Events.eventview import EventView
 from Debug.debughelpers import try_func_async
 from Utilities.constants import LoggingDefaults
 
@@ -20,6 +21,8 @@ class Events(commands.Cog):
     @commands.Cog.listener()
     @try_func_async()
     async def on_ready (self):
+        self.bot.add_view(EventView())
+        
         logging: Logging = self.bot.get_cog("Logging")
         if not logging: return
         
