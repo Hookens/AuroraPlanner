@@ -8,6 +8,8 @@ from discord.ext import commands
 from discord.embeds import Embed
 from discord.role import Role
 
+from Utilities.constants import EmbedDefaults
+
 from Debug.debughelpers import try_func_async
 from Events.eventview import EventView
 
@@ -27,7 +29,7 @@ class EventMethods(commands.Cog):
     async def handle_event(self, ctx: ApplicationContext, embedid: int, title: str = None, description: str = None, time: str = None, modpacktitle: str = None, modpacklink: str = None, minimumattendance: int = None, requireddlc: str = None, additionaldetails: str = None, imagelink: str = None, channel: TextChannel = None, ping: Role = None):
         embeds = self.bot.get_cog("Embeds")
         embed: Embed = Embed()
-        embed.colour = 0x8663FC
+        embed.colour = EmbedDefaults.PURPLE
         message: Message = None
         action: str = "creat"
 
@@ -43,7 +45,7 @@ class EventMethods(commands.Cog):
                 pass
 
             if message is None or not (message.author.id == self.bot.user.id and any(message.embeds[0].fields)):
-                return await embeds.generate_embed("Event edition error", f"No event with the provided ID was found{ ' in the given channel' if channel is not None else ''}.", 0xCC0000)
+                return embeds.generate_embed("Event edition error", f"No event with the provided ID was found{ ' in the given channel' if channel is not None else ''}.", 0xCC0000)
             
             embed = message.embeds[0]
 
@@ -57,7 +59,7 @@ class EventMethods(commands.Cog):
             try:
                 stime: str = self.get_time_field(datetime.strptime(time, "%d-%m-%Y %H:%M"))
             except:
-                stime = "Error parsing time input, refer to option tooltip."
+                stime = "Could not parse time input, refer to option tooltip."
             
             if message is not None:
                 embed.set_field_at(index=0, name="Time", value=stime, inline=False)
@@ -94,6 +96,7 @@ class EventMethods(commands.Cog):
             embed.add_field(name="Minimum Attendance", value=minimumattendance or "-", inline=False)
             embed.add_field(name="Required DLC", value=requireddlc or "-", inline=False)
             embed.add_field(name="Additional Details", value=self.format_description(additionaldetails or "-"), inline=False)
+            
             embed.add_field(name=":white_check_mark: Accepted", value=f"-", inline=True)
             embed.add_field(name=":no_entry_sign: Declined", value=f"-", inline=True)
             embed.add_field(name=":grey_question: Tentative", value=f"-", inline=True)
@@ -105,7 +108,7 @@ class EventMethods(commands.Cog):
 
             await message.edit(embed=message.embeds[0].set_footer(text=f"Event ID: {message.id}"))
 
-        return await embeds.generate_embed(f"Event {action}ion success", f"The event was successfully {action}ed.", 0x00AA00)
+        return embeds.generate_embed(f"Event {action}ion success", f"The event was successfully {action}ed.", 0x00AA00)
 
     @try_func_async()
     async def copy_event(self, ctx: ApplicationContext, embedid: int, channel: TextChannel = None):
@@ -121,7 +124,7 @@ class EventMethods(commands.Cog):
             pass
 
         if message is None or not (message.author.id == self.bot.user.id and any(message.embeds[0].fields)):
-            return await embeds.generate_embed("Event edition error", f"No event with the provided ID was found{ ' in the given channel' if channel is not None else ''}.", 0xCC0000)
+            return embeds.generate_embed("Event edition error", f"No event with the provided ID was found{ ' in the given channel' if channel is not None else ''}.", 0xCC0000)
         
         embed = message.embeds[0]
 
@@ -160,7 +163,7 @@ class EventMethods(commands.Cog):
                      + (f"\nimagelink:{embed.image.url}" if hasimage else "")
                      +  "```")
         
-        return await embeds.generate_embed(f"Creation command for {embed.title}", description, 0x00AA00)
+        return embeds.generate_embed(f"Creation command for {embed.title}", description, 0x00AA00)
             
 
 def setup(bot):

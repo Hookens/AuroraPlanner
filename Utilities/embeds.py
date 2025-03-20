@@ -5,14 +5,14 @@ from discord.bot import Bot
 from discord.embeds import Embed
 from discord.ext import commands
 
-from Debug.debughelpers import try_func_async
+from Debug.debughelpers import try_func
+from Utilities.constants import EmbedDefaults
 
 class Embeds(commands.Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
 
-    @try_func_async()
-    async def generate_embed(self, title: str, description: str, color: int = 0xCC0000, image: str = None, footer: str = None, **kwargs) -> Embed:
+    def generate_embed(self, title: str, description: str, color: int = EmbedDefaults.RED, image: str = None, footer: str = None, **kwargs) -> Embed:
         embed = Embed(title=title, description=description, colour=color)
         if image is not None:
             embed.set_thumbnail(url=image)
@@ -24,17 +24,17 @@ class Embeds(commands.Cog):
 
         return embed
 
-    async def unexpected_error(self) -> Embed:
-        return await self.generate_embed("Unexpected Error", f"TFAScheduler encountered an unexpected error.")
+    def unexpected_error(self) -> Embed:
+        return self.generate_embed("Unexpected Error", f"TFAScheduler encountered an unexpected error.")
 
-    async def cog_restarted(self, cog: str) -> Embed:
-        return await self.generate_embed("Cog Restarted", f"`{cog}` cog was successfully restarted.", 0x00AA00)
+    def cog_restarted(self, cog: str) -> Embed:
+        return self.generate_embed("Cog Restarted", f"`{cog}` cog was successfully restarted.", EmbedDefaults.GREEN)
 
-    async def cog_restart_error(self, cog: str) -> Embed:
-        return await self.generate_embed("Cog Restart Failed", f"`{cog}` cog could not be restarted.")
+    def cog_restart_error(self, cog: str) -> Embed:
+        return self.generate_embed("Cog Restart Failed", f"`{cog}` cog could not be restarted.")
 
-    async def generate_no_cog_found(self, cog: str) -> Embed:
-        return await self.generate_embed("Cog Not Found", f"`{cog}` cog was not found. Double-check availability.", 0xCCAA00)
+    def generate_no_cog_found(self, cog: str) -> Embed:
+        return self.generate_embed("Cog Not Found", f"`{cog}` cog was not found. Double-check availability.", EmbedDefaults.ORANGE)
 
 def setup(bot):
     bot.add_cog(Embeds(bot))

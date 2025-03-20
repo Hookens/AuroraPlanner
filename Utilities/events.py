@@ -1,11 +1,17 @@
 # Copyright (C) 2025 Hookens
 # See the LICENSE file in the project root for details.
 
+from discord.activity import Activity
 from discord.bot import Bot
+from discord.enums import ActivityType
 from discord.ext import commands
 
 from Debug.debughelpers import try_func_async
-from Events.eventview import EventView
+from Utilities.constants import LoggingDefaults
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from Debug.logging import Logging
 
 class Events(commands.Cog):
     def __init__(self, bot: Bot):
@@ -14,25 +20,10 @@ class Events(commands.Cog):
     @commands.Cog.listener()
     @try_func_async()
     async def on_ready (self):
-        self.bot.add_view(EventView())
-
-        cogcheck: int = 1
+        logging: Logging = self.bot.get_cog("Logging")
+        if not logging: return
         
-        if (logging := self.bot.get_cog("Logging")) is not None:
-            cogcheck += 1
-        if self.bot.get_cog("Embeds") is not None:
-            cogcheck += 1
-        if self.bot.get_cog("DebugMethods") is not None:
-            cogcheck += 1
-        if self.bot.get_cog("DebugCommands") is not None:
-            cogcheck += 1
-        if self.bot.get_cog("EventMethods") is not None:
-            cogcheck += 1
-        if self.bot.get_cog("EventCommands") is not None:
-            cogcheck += 1
-        
-        if logging is not None:
-            await logging.log_event(f"TFAScheduler is up. {cogcheck} of 7 cogs running. Currently serving {len(self.bot.guilds)} servers.", "INFO")
+        await logging.log_event(f"{LoggingDefaults.NAME} is up. {len(self.bot.cogs)} of {LoggingDefaults.COG_COUNT} cogs running. Currently serving {len(self.bot.guilds)} servers.", "INFO")
 
 def setup(bot):
     bot.add_cog(Events(bot))

@@ -19,18 +19,16 @@ from discord.ext import commands
 from dotenv import load_dotenv
 import os
 
+from Utilities.constants import Env, LoadOrder
+
 load_dotenv()
-TOKENTFASCHEDULER = os.getenv('DISCORD_TOKEN_TFASCHEDULER')
+TOKEN = os.getenv(Env.API_TOKEN)
 
 intents = discord.Intents().default()
-tfaschedulerClient = commands.Bot(intents=intents, help_command=None)
+intents.members = True
+client = commands.Bot(intents=intents, help_command=None)
 
-tfaschedulerClient.load_extension("Debug.logging")
-tfaschedulerClient.load_extension("Utilities.events")
-tfaschedulerClient.load_extension("Utilities.embeds")
-tfaschedulerClient.load_extension("Debug.debugcommands")
-tfaschedulerClient.load_extension("Debug.debugmethods")
-tfaschedulerClient.load_extension("Events.eventcommands")
-tfaschedulerClient.load_extension("Events.eventmethods")
+for COG in LoadOrder.COGS:
+    client.load_extension(COG)
 
-tfaschedulerClient.run(TOKENTFASCHEDULER)
+client.run(TOKEN)
