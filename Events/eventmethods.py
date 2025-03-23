@@ -1,33 +1,49 @@
 # Copyright (C) 2025 Hookens
 # See the LICENSE file in the project root for details.
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from discord import ApplicationContext, Message, TextChannel
 from discord.bot import Bot
 from discord.ext import commands
 from discord.embeds import Embed
 from discord.role import Role
+from urllib.parse import quote
 
 from Utilities.constants import EmbedDefaults
 
 from Debug.debughelpers import try_func_async
 from Events.eventview import EventView
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from Utilities.embeds import Embeds
+
 class EventMethods(commands.Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
 
-    def get_time_field(self, time: datetime) -> str:
-        timestr: str = f"<t:{int(time.timestamp())}:F> - Lobby open 30 minutes prior"
+    def get_calendar_link(self, guild_id: int, title: str, description: str, time: datetime) -> str:
+        guild_name = self.bot.get_guild(guild_id).name
+        end_time = time + timedelta(minutes=180)
+
+        start_str = time.strftime("%Y%m%dT%H%M%SZ")
+        end_str = end_time.strftime("%Y%m%dT%H%M%SZ")
+        link = f"https://calendar.google.com/calendar/render?action=TEMPLATE&text={quote(title)}&details={quote(description)}&location={quote(guild_name)}&dates={start_str}/{end_str}"
+
+        return link
+
+    def get_time_field(self, guild_id: int, title: str, description: str, time: datetime) -> str:
+        link = self.get_calendar_link(guild_id, title, description, time)
+        timestr: str = f"<t:{int(time.timestamp())}:F> [[Calendar]]({link})"
         
-        return f"{timestr}\n:clock2: <t:{int(time.timestamp())}:R>"
+        return f"{timestr}\n:clock2: <t:{int(time.timestamp())}:R>\nLobby open 30 minutes prior"
 
     def format_description(self, description: str)-> str:
         return description.replace("\\n", "\n")
 
     @try_func_async()
     async def handle_event(self, ctx: ApplicationContext, embedid: int, title: str = None, description: str = None, time: str = None, modpacktitle: str = None, modpacklink: str = None, minimumattendance: int = None, requireddlc: str = None, additionaldetails: str = None, imagelink: str = None, channel: TextChannel = None, ping: Role = None):
-        embeds = self.bot.get_cog("Embeds")
+        embeds: Embeds = self.bot.get_cog("Embeds")
         embed: Embed = Embed()
         embed.colour = EmbedDefaults.PURPLE
         message: Message = None
@@ -51,13 +67,17 @@ class EventMethods(commands.Cog):
 
         if title is not None:
             embed.title = title
+        else:
+            title = embed.title
         
         if description is not None:
-            embed.description = self.format_description(description)
+            embed.description = description = self.format_description(description)
+        else:
+            description = embed.description
 
         if time is not None:
             try:
-                stime: str = self.get_time_field(datetime.strptime(time, "%d-%m-%Y %H:%M"))
+                stime: str = self.get_time_field(ctx.guild_id, title, description, datetime.strptime(time, "%d-%m-%Y %H:%M"))
             except:
                 stime = "Could not parse time input, refer to option tooltip."
             
@@ -112,7 +132,7 @@ class EventMethods(commands.Cog):
 
     @try_func_async()
     async def copy_event(self, ctx: ApplicationContext, embedid: int, channel: TextChannel = None):
-        embeds = self.bot.get_cog("Embeds")
+        embeds: Embeds = self.bot.get_cog("Embeds")
         message: Message = None
 
         try:
@@ -166,5 +186,5 @@ class EventMethods(commands.Cog):
         return embeds.generate_embed(f"Creation command for {embed.title}", description, 0x00AA00)
             
 
-def setup(bot):
+def setup(bot: Bot):
     bot.add_cog(EventMethods(bot))
