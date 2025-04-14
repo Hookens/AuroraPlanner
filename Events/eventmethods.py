@@ -28,6 +28,14 @@ class EventMethods(commands.Cog):
 
         start_str = time.strftime("%Y%m%dT%H%M%SZ")
         end_str = end_time.strftime("%Y%m%dT%H%M%SZ")
+
+        if len(description) > 256:
+            index = description.find(' ', 240)
+            if index == -1 or index > 256:
+                index = 256
+
+            description = description[:index] + "..."
+
         link = f"https://calendar.google.com/calendar/render?action=TEMPLATE&text={quote(title)}&details={quote(description)}&location={quote(guild_name)}&dates={start_str}/{end_str}"
 
         return link
