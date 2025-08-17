@@ -15,6 +15,8 @@ class LoadOrder:
         "Help.helpcommands",
         "Events.eventmethods",
         "Events.eventcommands",
+        "Events.sharingmethods",
+        "Events.sharingcommands"
     ]
 
 class LoggingDefaults:
@@ -54,6 +56,8 @@ class DebugLists:
         "HelpMethods",
         "EventCommands",
         "EventMethods",
+        "SharingCommands",
+        "SharingMethods",
         "Embeds",
         "Events",
     ]
@@ -97,3 +101,6 @@ class EventTexts:
     F_DIFFCHANNEL = "The different channel in which the event is."
 
     C_COPY = "Copy a previously scheduled event into its original command form."
+
+    C_SHARE = "Share a previously scheduled event with select servers."
+    F_SERVERS = "The servers you wish to allow sharing with. IDs separated by commas."

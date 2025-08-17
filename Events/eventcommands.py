@@ -11,6 +11,10 @@ from discord.role import Role
 from Debug.debughelpers import try_func_async
 from Utilities.constants import EventTexts
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from Events.eventmethods import EventMethods
+
 class EventCommands(commands.Cog):
     schedule = SlashCommandGroup("schedule", EventTexts.S_SCHEDULE)
 
@@ -35,7 +39,7 @@ class EventCommands(commands.Cog):
         
         await ctx.interaction.response.defer(ephemeral=True)
 
-        methods = self.bot.get_cog("EventMethods")
+        methods: EventMethods = self.bot.get_cog("EventMethods")
         if methods is not None:
             await ctx.interaction.followup.send(embed=await methods.handle_event(ctx, 0, title, description, time, modpacktitle, modpacklink, minimumattendance, requireddlc, additionaldetails, imagelink, channel, ping))
 
@@ -57,7 +61,7 @@ class EventCommands(commands.Cog):
 
         await ctx.interaction.response.defer(ephemeral=True)
 
-        methods = self.bot.get_cog("EventMethods")
+        methods: EventMethods = self.bot.get_cog("EventMethods")
         if methods is not None:
             await ctx.interaction.followup.send(embed=await methods.handle_event(ctx, int(messageid), title, description, time, modpacktitle, modpacklink, minimumattendance, requireddlc, additionaldetails, imagelink, channel))
 
@@ -70,7 +74,7 @@ class EventCommands(commands.Cog):
 
         await ctx.interaction.response.defer(ephemeral=True)
 
-        methods = self.bot.get_cog("EventMethods")
+        methods: EventMethods = self.bot.get_cog("EventMethods")
         if methods is not None:
             await ctx.interaction.followup.send(embed=await methods.copy_event(ctx, int(messageid), channel))
 

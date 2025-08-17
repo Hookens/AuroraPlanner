@@ -1,9 +1,7 @@
 # Copyright (C) 2025 Hookens
 # See the LICENSE file in the project root for details.
 
-from discord.activity import Activity
 from discord.bot import Bot
-from discord.enums import ActivityType
 from discord.ext import commands
 
 from Events.eventview import EventView

@@ -46,9 +46,26 @@ class EventMethods(commands.Cog):
         
         return f"{timestr}\n:clock2: <t:{int(time.timestamp())}:R>\nLobby open 30 minutes prior"
 
-    def format_description(self, description: str)-> str:
+    def format_description(self, description: str) -> str:
         return description.replace("\\n", "\n")
+    
+    def get_modpack_info(self, modpack_field: str) -> tuple[str, str]:
+        if modpack_field == "-":
+            return ("", "")
 
+        title, link = "", ""
+        if "](" in modpack_field and modpack_field.endswith(")"):
+            try:
+                title_part, link_part = modpack_field.split("](", 1)
+                title = title_part.lstrip("[")
+                link = link_part.rstrip(")")
+            except ValueError:
+                pass
+        else:
+            title = modpack_field.strip()
+
+        return (title, link)
+    
     @try_func_async()
     async def handle_event(self, ctx: ApplicationContext, embedid: int, title: str = None, description: str = None, time: str = None, modpacktitle: str = None, modpacklink: str = None, minimumattendance: int = None, requireddlc: str = None, additionaldetails: str = None, imagelink: str = None, channel: TextChannel = None, ping: Role = None):
         embeds: Embeds = self.bot.get_cog("Embeds")
@@ -69,7 +86,7 @@ class EventMethods(commands.Cog):
                 pass
 
             if message is None or not (message.author.id == self.bot.user.id and any(message.embeds[0].fields)):
-                return embeds.generate_embed("Event edition error", f"No event with the provided ID was found{ ' in the given channel' if channel is not None else ''}.", 0xCC0000)
+                return embeds.generate_not_found_embed(channel)
             
             embed = message.embeds[0]
 
@@ -98,15 +115,19 @@ class EventMethods(commands.Cog):
             embed.set_image(url=imagelink)
 
         if message is not None:
-            if modpacktitle is not None:
+            if modpacktitle or modpacklink :
                 value: str = embed.fields[1].value
-                packlink: str = value.split("]")[1]
-                embed.set_field_at(index=1, name="Modpack", value=f"[{modpacktitle}]{packlink}", inline=False)
+                currentpacktitle, currentpacklink = self.get_modpack_info(value)
 
-            if modpacklink is not None:
-                value: str = embed.fields[1].value
-                packname: str = value.split("(")[0]
-                embed.set_field_at(index=1, name="Modpack", value=f"{packname}({modpacklink})", inline=False)
+                packtitle = modpacktitle if modpacktitle else currentpacktitle
+                packlink = modpacklink if modpacklink else currentpacklink
+
+                packtitle = f"[{packtitle}]" if packtitle else ""
+                packlink = f"({packlink})" if packlink else ""
+
+                pack = f"{packtitle}{packlink}".strip() or "None"
+
+                embed.set_field_at(index=1, name="Modpack", value=pack, inline=False)
 
             if minimumattendance is not None:
                 embed.set_field_at(index=2, name="Minimum Attendance", value=f"{minimumattendance}", inline=False)
@@ -152,7 +173,7 @@ class EventMethods(commands.Cog):
             pass
 
         if message is None or not (message.author.id == self.bot.user.id and any(message.embeds[0].fields)):
-            return embeds.generate_embed("Event edition error", f"No event with the provided ID was found{ ' in the given channel' if channel is not None else ''}.", 0xCC0000)
+            return embeds.generate_not_found_embed(channel)
         
         embed = message.embeds[0]
 
@@ -162,12 +183,10 @@ class EventMethods(commands.Cog):
         if hastime:
             time: datetime = datetime.fromtimestamp(int(embed.fields[0].value.split(":F>")[0].replace("<t:", "")))
             timestr = time.strftime("%d-%m-%Y %H:%M")
-            
+        
+        pack = embed.fields[1].value
+        modpacktitle, modpacklink = self.get_modpack_info(pack)
         haspack = embed.fields[1].value != "-"
-        if haspack:
-            modpack = embed.fields[1].value.split("](")
-            modpacktitle = modpack[0].replace('[', '')
-            modpacklink = modpack[1].replace(')', '')
 
         hasattendance = embed.fields[2].value != "-"
         hasrequireddlc = embed.fields[3].value != "-"

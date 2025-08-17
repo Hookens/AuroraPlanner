@@ -1,11 +1,11 @@
 # Copyright (C) 2025 Hookens
 # See the LICENSE file in the project root for details.
 
+from discord import TextChannel
 from discord.bot import Bot
 from discord.embeds import Embed
 from discord.ext import commands
 
-from Debug.debughelpers import try_func
 from Utilities.constants import EmbedDefaults
 
 class Embeds(commands.Cog):
@@ -23,6 +23,9 @@ class Embeds(commands.Cog):
             embed.add_field(name=key, value=value, inline=False)
 
         return embed
+    
+    def generate_not_found_embed(self, channel: TextChannel | None):
+        return self.generate_embed("Event edition error", f"No event with the provided ID was found { f'in {channel.mention}' if channel is not None else 'in the current channel'}.", EmbedDefaults.RED)
 
     def unexpected_error(self) -> Embed:
         return self.generate_embed("Unexpected Error", f"TFAScheduler encountered an unexpected error.")
