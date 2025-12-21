@@ -24,7 +24,7 @@ class Embeds(commands.Cog):
 
         return embed
     
-    def generate_not_found_embed(self, channel: TextChannel | None):
+    def generate_not_found_embed(self, channel):
         return self.generate_embed("Event edition error", f"No event with the provided ID was found { f'in {channel.mention}' if channel is not None else 'in the current channel'}.", EmbedDefaults.RED)
 
     def unexpected_error(self) -> Embed:
